@@ -6,6 +6,7 @@ import com.hotel.engine.algorithm.flow.AugmentingStep;
 import com.hotel.engine.algorithm.flow.EdmondsKarp;
 import com.hotel.engine.algorithm.flow.FlowNetwork;
 import com.hotel.engine.algorithm.flow.MaxFlowResult;
+import com.hotel.engine.algorithm.segtree.AvailabilitySegmentTree;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
@@ -175,5 +176,37 @@ public class DemoController {
         }
 
         return new FlowDemoResponse(result.maxFlow(), nodes, edges, steps, minCut, cutCapacity, assignments, unassigned);
+    }
+
+    // ---------- Segment tree ----------
+
+    public record AvailabilityDemoResponse(
+            int[] freeRoomsBefore,
+            int from,
+            int to,
+            int roomsWanted,
+            AvailabilitySegmentTree.BookingOutcome outcome,
+            int[] freeRoomsAfter) {
+    }
+
+    /**
+     * Deluxe rooms free on each of 8 nights. Tries to book `rooms` rooms from night `from` to night `to`.
+     * The defaults ask for 3 rooms on nights 2 to 6, which fits (night 4 has exactly 3 free).
+     */
+    @GetMapping("/availability")
+    public AvailabilityDemoResponse availability(
+            @RequestParam(defaultValue = "2") @Min(0) @Max(7) int from,
+            @RequestParam(defaultValue = "6") @Min(0) @Max(7) int to,
+            @RequestParam(defaultValue = "3") @Min(1) @Max(10) int rooms) {
+
+        int[] before = {5, 5, 4, 5, 3, 5, 5, 2};
+        AvailabilitySegmentTree tree = new AvailabilitySegmentTree(before);
+        AvailabilitySegmentTree.BookingOutcome outcome = tree.tryBook(from, to, rooms);
+
+        int[] after = new int[tree.size()];
+        for (int night = 0; night < after.length; night++) {
+            after[night] = tree.valueAt(night);
+        }
+        return new AvailabilityDemoResponse(before, from, to, rooms, outcome, after);
     }
 }

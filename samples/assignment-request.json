@@ -1,0 +1,18 @@
+{
+  "guests": [
+    { "id": "B1", "name": "Mehta",  "roomType": "STANDARD", "needsAccessible": false, "maxFloor": null, "acceptsUpgrade": true },
+    { "id": "B2", "name": "Rao",    "roomType": "STANDARD", "needsAccessible": true,  "maxFloor": null, "acceptsUpgrade": false },
+    { "id": "B3", "name": "Iyer",   "roomType": "DELUXE",   "needsAccessible": true,  "maxFloor": 2,    "acceptsUpgrade": false },
+    { "id": "B4", "name": "Khan",   "roomType": "DELUXE",   "needsAccessible": false, "maxFloor": null, "acceptsUpgrade": false },
+    { "id": "B5", "name": "Das",    "roomType": "SUITE",    "needsAccessible": false, "maxFloor": null, "acceptsUpgrade": false },
+    { "id": "B6", "name": "Pillai", "roomType": "DELUXE",   "needsAccessible": true,  "maxFloor": 1,    "acceptsUpgrade": false },
+    { "id": "B7", "name": "Nair",   "roomType": "DELUXE",   "needsAccessible": false, "maxFloor": null, "acceptsUpgrade": false }
+  ],
+  "rooms": [
+    { "number": "101", "type": "STANDARD", "floor": 1, "accessible": true },
+    { "number": "102", "type": "STANDARD", "floor": 1, "accessible": false },
+    { "number": "201", "type": "DELUXE",   "floor": 2, "accessible": false },
+    { "number": "202", "type": "DELUXE",   "floor": 2, "accessible": true },
+    { "number": "301", "type": "SUITE",    "floor": 3, "accessible": false }
+  ]
+}
