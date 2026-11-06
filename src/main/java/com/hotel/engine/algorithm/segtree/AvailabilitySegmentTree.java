@@ -136,6 +136,34 @@ public final class AvailabilitySegmentTree {
     public record BookingOutcome(boolean booked, SegmentTreeTrace check, SegmentTreeTrace update) {
     }
 
+    /**
+     * A tree node as the visualization draws it.
+     *
+     * @param min  smallest free-room count in [lo, hi], not counting amounts an ancestor still owes it
+     *             (nodes under a pending lazy tag show their old value until pushDown reaches them)
+     * @param lazy amount this node still owes its children (0 if nothing is pending)
+     */
+    public record TreeNode(int node, int lo, int hi, int min, int lazy) {
+    }
+
+    /** Every node, top to bottom, left to right. Doesn't change the tree. */
+    public List<TreeNode> nodes() {
+        List<TreeNode> out = new ArrayList<>();
+        collect(1, 0, size - 1, out);
+        out.sort((a, b) -> Integer.compare(a.node(), b.node()));
+        return out;
+    }
+
+    private void collect(int node, int lo, int hi, List<TreeNode> out) {
+        out.add(new TreeNode(node, lo, hi, min[node], lazy[node]));
+        if (lo == hi) {
+            return;
+        }
+        int mid = (lo + hi) >>> 1;
+        collect(2 * node, lo, mid, out);
+        collect(2 * node + 1, mid + 1, hi, out);
+    }
+
     /** Free rooms on a single night. */
     public int valueAt(int night) {
         return queryMin(night, night).value();
