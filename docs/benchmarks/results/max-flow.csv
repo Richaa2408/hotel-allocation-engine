@@ -1,0 +1,4 @@
+guests,rooms,suitable_pairs,max_flow_placed,first_fit_placed,extra_guests_placed,augmenting_paths,max_flow_ms,first_fit_ms
+100,90,353,79,67,12,79,0.716,0.0139
+1000,900,3518,743,643,100,743,10.911,0.1286
+5000,4500,17504,3730,3242,488,3730,672.499,1.2111

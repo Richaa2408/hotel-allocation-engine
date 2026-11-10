@@ -1,0 +1,4 @@
+nights,operations,segment_tree_ms,segment_tree_with_trace_ms,array_scan_ms,speedup,tree_us_per_op,scan_us_per_op
+1000,20000,4.910,23.368,5.034,1.03,0.246,0.252
+10000,20000,7.225,17.432,46.576,6.45,0.361,2.329
+100000,20000,14.414,29.219,496.038,34.41,0.721,24.802

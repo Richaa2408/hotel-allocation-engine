@@ -55,16 +55,29 @@ public final class AvailabilitySegmentTree {
         return new SegmentTreeTrace("QUERY_MIN", from, to, result, visits);
     }
 
+    /** Same as queryMin(from, to).value(), without recording a trace. */
+    public int minOver(int from, int to) {
+        checkRange(from, to);
+        return query(1, 0, size - 1, from, to, null);
+    }
+
+    /** Adds to each visit list unless it is null (the fast path, when no trace is wanted). */
+    private static void record(List<NodeVisit> visits, int node, int lo, int hi, NodeVisit.Kind kind) {
+        if (visits != null) {
+            visits.add(new NodeVisit(node, lo, hi, kind));
+        }
+    }
+
     private int query(int node, int lo, int hi, int from, int to, List<NodeVisit> visits) {
         if (to < lo || hi < from) {
-            visits.add(new NodeVisit(node, lo, hi, NodeVisit.Kind.OUTSIDE));
+            record(visits, node, lo, hi, NodeVisit.Kind.OUTSIDE);
             return Integer.MAX_VALUE;
         }
         if (from <= lo && hi <= to) {
-            visits.add(new NodeVisit(node, lo, hi, NodeVisit.Kind.FULL));
+            record(visits, node, lo, hi, NodeVisit.Kind.FULL);
             return min[node];
         }
-        visits.add(new NodeVisit(node, lo, hi, NodeVisit.Kind.PARTIAL));
+        record(visits, node, lo, hi, NodeVisit.Kind.PARTIAL);
         pushDown(node);
         int mid = (lo + hi) >>> 1;
         return Math.min(
@@ -80,18 +93,24 @@ public final class AvailabilitySegmentTree {
         return new SegmentTreeTrace("RANGE_ADD", from, to, delta, visits);
     }
 
+    /** Same as rangeAdd, without recording a trace. */
+    public void add(int from, int to, int delta) {
+        checkRange(from, to);
+        update(1, 0, size - 1, from, to, delta, null);
+    }
+
     private void update(int node, int lo, int hi, int from, int to, int delta, List<NodeVisit> visits) {
         if (to < lo || hi < from) {
-            visits.add(new NodeVisit(node, lo, hi, NodeVisit.Kind.OUTSIDE));
+            record(visits, node, lo, hi, NodeVisit.Kind.OUTSIDE);
             return;
         }
         if (from <= lo && hi <= to) {
             // Whole node is inside the range: update it and leave a note (lazy tag) for its children.
-            visits.add(new NodeVisit(node, lo, hi, NodeVisit.Kind.FULL));
+            record(visits, node, lo, hi, NodeVisit.Kind.FULL);
             apply(node, delta);
             return;
         }
-        visits.add(new NodeVisit(node, lo, hi, NodeVisit.Kind.PARTIAL));
+        record(visits, node, lo, hi, NodeVisit.Kind.PARTIAL);
         pushDown(node);
         int mid = (lo + hi) >>> 1;
         update(2 * node, lo, mid, from, to, delta, visits);
@@ -166,7 +185,22 @@ public final class AvailabilitySegmentTree {
 
     /** Free rooms on a single night. */
     public int valueAt(int night) {
-        return queryMin(night, night).value();
+        checkRange(night, night);
+        // Read-only: walk root to leaf adding the lazy amounts the ancestors still owe, instead of
+        // pushing them down. This leaves pending lazy tags in place so the visualization can show them.
+        int node = 1, lo = 0, hi = size - 1, owed = 0;
+        while (lo != hi) {
+            owed += lazy[node];
+            int mid = (lo + hi) >>> 1;
+            if (night <= mid) {
+                node = 2 * node;
+                hi = mid;
+            } else {
+                node = 2 * node + 1;
+                lo = mid + 1;
+            }
+        }
+        return min[node] + owed;
     }
 
     private void checkRange(int from, int to) {

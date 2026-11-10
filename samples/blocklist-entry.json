@@ -1,5 +1,5 @@
 {
   "kind": "EMAIL",
-  "value": "fraud.ring@mail.com",
-  "reason": "Chargeback, Aug 2026"
+  "value": "chargeback.case@example.net",
+  "reason": "Chargeback, Oct 2026"
 }

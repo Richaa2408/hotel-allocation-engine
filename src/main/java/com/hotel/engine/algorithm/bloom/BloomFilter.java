@@ -1,7 +1,5 @@
 package com.hotel.engine.algorithm.bloom;
 
-import java.nio.charset.StandardCharsets;
-
 /**
  * A Bloom filter for strings, implemented from scratch.
  *
@@ -80,9 +78,21 @@ public final class BloomFilter {
         return new BloomTrace("CHECK", item, positions, wasSet, allSet);
     }
 
-    /** Shortcut for check(item).possiblyPresent(). */
+    /**
+     * Same answer as check(item).possiblyPresent(), without building a trace: no arrays are
+     * allocated and it stops at the first 0 bit. Used when nobody needs to draw the lookup.
+     */
     public boolean mightContain(String item) {
-        return check(item).possiblyPresent();
+        checkItem(item);
+        long base = fnv1a64(item);
+        long h1 = mix64(base);
+        long h2 = mix64(base ^ 0x9E3779B97F4A7C15L) | 1L;
+        for (int i = 0; i < hashCount; i++) {
+            if (!getBit((int) Math.floorMod(h1 + i * h2, (long) bitCount))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -92,11 +102,8 @@ public final class BloomFilter {
      * (Kirsch &amp; Mitzenmacher, 2006).
      */
     int[] positionsOf(String item) {
-        if (item == null || item.isEmpty()) {
-            throw new IllegalArgumentException("item must not be null or empty");
-        }
-        byte[] bytes = item.getBytes(StandardCharsets.UTF_8);
-        long base = fnv1a64(bytes);
+        checkItem(item);
+        long base = fnv1a64(item);
         long h1 = mix64(base);
         long h2 = mix64(base ^ 0x9E3779B97F4A7C15L) | 1L; // odd, so it is never 0
 
@@ -107,11 +114,21 @@ public final class BloomFilter {
         return positions;
     }
 
-    /** FNV-1a: a simple, well-known 64-bit string hash. */
-    private static long fnv1a64(byte[] bytes) {
+    private static void checkItem(String item) {
+        if (item == null || item.isEmpty()) {
+            throw new IllegalArgumentException("item must not be null or empty");
+        }
+    }
+
+    /**
+     * FNV-1a: a simple, well-known 64-bit string hash. It reads the string's characters directly
+     * instead of first copying them into a byte array, which saves an allocation per lookup.
+     * For plain ASCII text (emails, phone digits) this gives the same value as hashing the bytes.
+     */
+    private static long fnv1a64(String s) {
         long hash = 0xcbf29ce484222325L;          // FNV offset basis
-        for (byte b : bytes) {
-            hash ^= (b & 0xff);
+        for (int i = 0; i < s.length(); i++) {
+            hash ^= s.charAt(i);
             hash *= 0x100000001b3L;               // FNV prime
         }
         return hash;

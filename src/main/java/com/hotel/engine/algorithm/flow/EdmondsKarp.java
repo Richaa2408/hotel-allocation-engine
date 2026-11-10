@@ -1,8 +1,6 @@
 package com.hotel.engine.algorithm.flow;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,16 +24,16 @@ public final class EdmondsKarp {
         }
         network.resetFlow();
 
+        Search search = new Search(network);
         List<AugmentingStep> steps = new ArrayList<>();
         int totalFlow = 0;
-        int[] parentEdge;
 
-        while ((parentEdge = bfs(network, source, sink)) != null) {
+        while (search.bfs(source, sink)) {
             // Walk back from the sink to collect the path and its bottleneck.
             List<Integer> edges = new ArrayList<>();
             int bottleneck = Integer.MAX_VALUE;
-            for (int v = sink; v != source; v = network.from(parentEdge[v])) {
-                int e = parentEdge[v];
+            for (int v = sink; v != source; v = network.from(search.parentEdge[v])) {
+                int e = search.parentEdge[v];
                 edges.add(e);
                 bottleneck = Math.min(bottleneck, network.residual(e));
             }
@@ -46,7 +44,7 @@ public final class EdmondsKarp {
             }
             totalFlow += bottleneck;
 
-            List<Integer> path = new ArrayList<>();
+            List<Integer> path = new ArrayList<>(edges.size() + 1);
             path.add(source);
             for (int e : edges) {
                 path.add(network.to(e));
@@ -54,17 +52,16 @@ public final class EdmondsKarp {
             steps.add(new AugmentingStep(steps.size() + 1, path, edges, bottleneck, totalFlow));
         }
 
-        // When no path is left, the nodes BFS can still reach form the source side of a minimum cut.
-        boolean[] reachable = reachableFrom(network, source);
+        // The final BFS failed to reach the sink; the nodes it did reach form the source side of a minimum cut.
         List<Integer> sourceSide = new ArrayList<>();
         for (int v = 0; v < network.nodeCount(); v++) {
-            if (reachable[v]) {
+            if (search.reached(v)) {
                 sourceSide.add(v);
             }
         }
         List<Integer> cutEdges = new ArrayList<>();
         for (int e = 0; e < network.edgeCount() * 2; e += 2) {   // forward edges only
-            if (reachable[network.from(e)] && !reachable[network.to(e)]) {
+            if (search.reached(network.from(e)) && !search.reached(network.to(e))) {
                 cutEdges.add(e);
             }
         }
@@ -72,49 +69,56 @@ public final class EdmondsKarp {
     }
 
     /**
-     * Breadth-first search over edges with residual capacity > 0.
-     * Returns parentEdge[v] = the edge used to reach v, or null if the sink is unreachable.
+     * Breadth-first search state, allocated once and reused for every BFS.
+     * Instead of clearing a visited array each time, each BFS gets a new "round" number and a node
+     * counts as visited when seen[v] equals the current round.
      */
-    private static int[] bfs(FlowNetwork network, int source, int sink) {
-        int[] parentEdge = new int[network.nodeCount()];
-        Arrays.fill(parentEdge, -1);
-        boolean[] visited = new boolean[network.nodeCount()];
-        ArrayDeque<Integer> queue = new ArrayDeque<>();
-        queue.add(source);
-        visited[source] = true;
+    private static final class Search {
+        private final FlowNetwork network;
+        private final int[] adjStart;
+        private final int[] adjEdges;
+        final int[] parentEdge;
+        private final int[] seen;
+        private final int[] queue;
+        private int round;
 
-        while (!queue.isEmpty()) {
-            int u = queue.poll();
-            for (int e : network.edgesOut(u)) {
-                int v = network.to(e);
-                if (!visited[v] && network.residual(e) > 0) {
-                    visited[v] = true;
-                    parentEdge[v] = e;
-                    if (v == sink) {
-                        return parentEdge;
+        Search(FlowNetwork network) {
+            this.network = network;
+            this.adjStart = network.adjacencyStart();
+            this.adjEdges = network.adjacencyEdges();
+            int n = network.nodeCount();
+            this.parentEdge = new int[n];
+            this.seen = new int[n];
+            this.queue = new int[n];
+        }
+
+        boolean reached(int v) {
+            return seen[v] == round;
+        }
+
+        /** Searches edges with residual capacity > 0. Fills parentEdge and returns true if the sink was reached. */
+        boolean bfs(int source, int sink) {
+            round++;
+            int head = 0;
+            int tail = 0;
+            queue[tail++] = source;
+            seen[source] = round;
+            while (head < tail) {
+                int u = queue[head++];
+                for (int i = adjStart[u]; i < adjStart[u + 1]; i++) {
+                    int e = adjEdges[i];
+                    int v = network.to(e);
+                    if (seen[v] != round && network.residual(e) > 0) {
+                        seen[v] = round;
+                        parentEdge[v] = e;
+                        if (v == sink) {
+                            return true;
+                        }
+                        queue[tail++] = v;
                     }
-                    queue.add(v);
                 }
             }
+            return false;
         }
-        return null;
-    }
-
-    private static boolean[] reachableFrom(FlowNetwork network, int source) {
-        boolean[] visited = new boolean[network.nodeCount()];
-        ArrayDeque<Integer> queue = new ArrayDeque<>();
-        queue.add(source);
-        visited[source] = true;
-        while (!queue.isEmpty()) {
-            int u = queue.poll();
-            for (int e : network.edgesOut(u)) {
-                int v = network.to(e);
-                if (!visited[v] && network.residual(e) > 0) {
-                    visited[v] = true;
-                    queue.add(v);
-                }
-            }
-        }
-        return visited;
     }
 }
