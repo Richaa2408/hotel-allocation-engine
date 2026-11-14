@@ -26,6 +26,7 @@ const actionText: Record<string, string> = {
   ASSIGNMENT_RUN: "Rooms assigned",
   ROOM_ASSIGNED: "Room assigned by hand",
   ROOM_UNASSIGNED: "Room taken off",
+  ROOM_REMOVED: "Room removed from booking",
   ROOM_REASSIGNED: "Guest moved",
   ROOM_REASSIGN_FAILED: "Couldn't move guest",
   MAINTENANCE_ADDED: "Room out of service",

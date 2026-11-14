@@ -22,6 +22,9 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, Lo
 
     List<AssignmentEntity> findByRoomAndActiveTrue(RoomEntity room);
 
+    /** Every assignment (active and released) of one request, oldest first. */
+    List<AssignmentEntity> findByRequestOrderByAssignedAtAsc(RoomRequestEntity request);
+
     /** All assignments (active and released) for a reservation, oldest first: its room history. */
     @Query("select a from AssignmentEntity a where a.request.reservation = :reservation order by a.assignedAt asc")
     List<AssignmentEntity> history(@Param("reservation") ReservationEntity reservation);

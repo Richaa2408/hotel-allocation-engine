@@ -5,7 +5,7 @@ screening (Spring Boot 4 · Java 21 · PostgreSQL 17 · React 19 · TypeScript �
 **State documented:** working tree of branch `main` on **12 November 2026**, *including uncommitted
 changes* (last commit `b834c9a`). See [Volume 2 §5.7](docs/handbook/02-architecture-and-repository.md#57-working-tree-state-vs-last-commit).
 **Verification performed:** every source, config, test and doc file was read; the backend test
-suite (59 tests) and frontend tests (9) plus TypeScript type-check were run and passed; the Maven
+suite (65 tests) and frontend tests (9) plus TypeScript type-check were run and passed; the Maven
 dependency tree was resolved. The running application against PostgreSQL was **not** started.
 
 > Secrets policy: demo passwords and the local database password exist in
@@ -138,10 +138,10 @@ StayFlow is a **layered Spring Boot monolith** that serves a **React SPA** and a
 
 Correctness under concurrency comes from one **fair global lock around each write transaction**
 plus **rebuild-on-failure** of the in-memory structures — simple and provably safe in one JVM, but
-the main obstacle to horizontal scaling. Quality evidence: 59 backend tests (randomised comparisons
+the main obstacle to horizontal scaling. Quality evidence: 65 backend tests (randomised comparisons
 with brute force, theory checks, flows, an 8-thread race, security rules) and 9 frontend tests.
-Weak spots: no CI, local-only deployment, committed demo credentials, a few logic bugs (see
-Volume 11 L4, L7, L31), N+1 queries, and stale session privileges.
+Weak spots: no CI, local-only deployment, committed demo credentials, a logic bug in unplaced-guest
+suggestions (Volume 11 L7; L4 and L31 have been fixed), N+1 queries, and stale session privileges.
 
 ---
 
@@ -200,7 +200,7 @@ All 21 requirement sections, as per the checklist above, in 13 volumes + index.
 
 | Check | Result |
 |---|---|
-| `mvnw test -Dskip.npm -Dskip.installnodenpm` | 59 tests, 0 failures, 0 errors |
+| `mvnw test -Dskip.npm -Dskip.installnodenpm` | 65 tests, 0 failures, 0 errors (15 Nov 2026, after adding `ReservationEditEdgeCasesTest` and fixing bugs L4 and L31) |
 | `vitest run` | 9 tests passed |
 | `tsc -b` | no type errors |
 | `mvnw dependency:tree` | resolved versions listed in Vol 3 |
@@ -211,9 +211,8 @@ All 21 requirement sections, as per the checklist above, in 13 volumes + index.
   project's docs (≈2,800/2,835 reservations, "22 of 23 placed", `visitor71750@example.org` after
   71,751 tries) are **reported, not re-observed**.
 - **Benchmarks were not re-run**; numbers come from `docs/benchmarks/results/*.csv`.
-- Runtime behaviour of suspected bugs **L4** (status code for reversed dates on waitlisted edits),
-  **L31** (FK violation when shrinking a booking) and **L3** (stale session privileges) was inferred
-  from code and framework semantics, not reproduced.
+- Bug **L3** (stale session privileges) was inferred from code and framework semantics, not
+  reproduced. (L4 and L31 were later reproduced by `ReservationEditEdgeCasesTest` and fixed.)
 - Docker image build and `docker compose up` were not executed; their documentation is from reading
   the files.
 - Exact Spring Security filter order was described from framework knowledge, not printed.
@@ -229,7 +228,7 @@ All 21 requirement sections, as per the checklist above, in 13 volumes + index.
 
 ### Areas needing further investigation
 
-1. Reproduce L31 and L4 with integration tests (Vol 10 §15.5 lists the tests to write).
+1. Add a session test for L3 (L4 and L31 are reproduced and fixed).
 2. Run the stack in Docker and confirm the seeded demo figures and the shortage explanation.
 3. Re-run benchmarks on a quiet machine for the report.
 4. Decide on a multi-instance strategy only if high availability becomes a requirement (Vol 11 D2/D4).

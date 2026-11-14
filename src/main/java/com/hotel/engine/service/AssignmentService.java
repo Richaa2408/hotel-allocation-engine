@@ -403,6 +403,18 @@ public class AssignmentService {
         });
     }
 
+    /**
+     * A room request is being removed from its booking (fewer rooms): deletes its assignment rows, active
+     * and released, so the request itself can be deleted. Returns the rooms it had, oldest first, for the
+     * audit log, which keeps the record once the rows are gone.
+     */
+    List<String> deleteRequestHistory(RoomRequestEntity q) {
+        List<AssignmentEntity> rows = assignmentRepo.findByRequestOrderByAssignedAtAsc(q);
+        List<String> roomsHeld = rows.stream().map(a -> a.getRoom().getNumber()).toList();
+        assignmentRepo.deleteAll(rows);
+        return roomsHeld;
+    }
+
     List<String> assignedRoomNumbers(ReservationEntity r) {
         List<RoomRequestEntity> reqs = requests.findByReservationOrderBySeqAsc(r);
         if (reqs.isEmpty()) {

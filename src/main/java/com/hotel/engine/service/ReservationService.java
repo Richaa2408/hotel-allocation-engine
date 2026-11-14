@@ -277,6 +277,11 @@ public class ReservationService {
                         + "Move rooms from Room Assignment instead.");
             }
 
+            if (stayChanged && !status.holdsInventory()) {
+                // Waitlisted or held: no rooms to move, but the stay must still be one that could be booked.
+                inventory.validateChangedStay(type, in, out, rooms, acc, !in.equals(r.getCheckIn()));
+            }
+
             if (stayChanged && status.holdsInventory()) {
                 if (!out.isAfter(in)) {
                     throw new InvalidInputException("Check-out must be after check-in.");
@@ -340,8 +345,14 @@ public class ReservationService {
             requests.save(new RoomRequestEntity(r, i));
         }
         for (int i = current.size() - 1; i >= rooms; i--) {
-            assignments.releaseRequest(current.get(i), "Room removed from the booking");
-            requests.delete(current.get(i));
+            // The request's assignment rows reference it, so they go first; the audit line keeps the record.
+            RoomRequestEntity removed = current.get(i);
+            List<String> held = assignments.deleteRequestHistory(removed);
+            requests.delete(removed);
+            if (!held.isEmpty()) {
+                audit.log("ROOM_REMOVED", "RESERVATION", r.getReference(), "Room " + removed.getSeq()
+                        + " of the booking removed; it had been in room " + String.join(", then ", held));
+            }
         }
     }
 

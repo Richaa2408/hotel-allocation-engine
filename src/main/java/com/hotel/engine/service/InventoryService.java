@@ -351,6 +351,17 @@ public class InventoryService {
 
     // ---------- helpers ----------
 
+    /**
+     * The date and room-count rules for a changed stay that holds no inventory (waitlisted or held for
+     * review): check-out after check-in, inside the booking window, enough rooms of the type exist, and
+     * a check-in that was moved can't be in the past.
+     */
+    public synchronized void validateChangedStay(RoomType type, LocalDate checkIn, LocalDate checkOut, int roomsWanted,
+                                                 boolean needsAccessible, boolean checkInMoved) {
+        ensureCurrent();
+        validateStay(type, checkIn, checkOut, roomsWanted, needsAccessible, checkInMoved);
+    }
+
     void validateStay(RoomType type, LocalDate checkIn, LocalDate checkOut, int roomsWanted, boolean needsAccessible,
                       boolean newStay) {
         if (type == null) {
