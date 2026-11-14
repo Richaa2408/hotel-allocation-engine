@@ -1,0 +1,85 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+/*
+ * StayFlow design tokens. Navy sidebar, warm ivory background, teal for primary actions,
+ * amber and coral for warnings and problems. No gradients; depth comes from borders and soft shadows.
+ */
+@theme {
+  --font-sans: "Inter Variable", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font-mono: "Cascadia Mono", Consolas, "SFMono-Regular", Menlo, monospace;
+
+  --color-ink: #16202c;
+  --color-muted: #5b6573;
+  --color-subtle: #8a93a0;
+  --color-line: #e3e0d8;
+  --color-line-strong: #cfcac0;
+  --color-canvas: #f7f5f0;
+  --color-surface: #ffffff;
+  --color-sunken: #f1eee8;
+
+  --color-navy-950: #0b1726;
+  --color-navy-900: #10213a;
+  --color-navy-800: #1a2f4d;
+  --color-navy-700: #26406a;
+  --color-navy-300: #9fb2cc;
+
+  --color-teal-50: #e8f4f2;
+  --color-teal-100: #cfe8e4;
+  --color-teal-600: #0f766e;
+  --color-teal-700: #0b5f58;
+  --color-teal-800: #0a4c47;
+
+  --color-amber-50: #fdf5e7;
+  --color-amber-600: #b45309;
+  --color-amber-700: #92400e;
+
+  --color-coral-50: #fdeeeb;
+  --color-coral-500: #e0533d;
+  --color-coral-700: #b23421;
+
+  --color-ok-50: #eaf5ee;
+  --color-ok-600: #1f7a3d;
+
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  --shadow-card: 0 1px 2px rgb(16 33 58 / 0.05), 0 1px 1px rgb(16 33 58 / 0.03);
+  --shadow-pop: 0 10px 30px rgb(16 33 58 / 0.14);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-canvas text-ink antialiased;
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-teal-600);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--color-teal-100);
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Motion only where it explains something (algorithm replays); off for people who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

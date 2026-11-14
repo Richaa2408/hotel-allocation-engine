@@ -1,0 +1,11 @@
+# Keep the build context small and free of local state.
+.git
+.claude
+.idea
+.vscode
+target
+frontend/node_modules
+frontend/dist
+docs
+samples
+*.md

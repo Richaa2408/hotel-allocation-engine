@@ -1,4 +1,4 @@
-entries,bloom_bytes,hashset_bytes_approx,memory_ratio,expected_fpr,measured_fpr,exact_lookups_avoided_pct,bloom_lookup_ns,bloom_with_trace_ns,hashset_lookup_ns
-10000,11984,562744,47.0,0.01004,0.00975,99.03,84.4,114.7,16.7
-100000,119816,5103104,42.6,0.01004,0.00972,99.03,85.2,129.8,18.4
-1000000,1198136,38482080,32.1,0.01004,0.01010,98.99,106.1,154.6,32.1
+entries,bloom_bytes,hashset_bytes_estimated,memory_ratio,expected_fpr,measured_fpr,exact_lookups_avoided_pct,bloom_lookup_ns,bloom_with_trace_ns,hashset_lookup_ns
+10000,11984,1025616,85.6,0.01004,0.00975,99.03,64.7,115.9,11.7
+100000,119816,10648656,88.9,0.01004,0.00972,99.03,71.3,119.3,14.1
+1000000,1198136,111588688,93.1,0.01004,0.01010,98.99,94.6,171.7,32.5

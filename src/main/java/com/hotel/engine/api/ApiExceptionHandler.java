@@ -1,9 +1,14 @@
 package com.hotel.engine.api;
 
+import com.hotel.engine.domain.ConflictException;
 import com.hotel.engine.domain.InvalidInputException;
+import com.hotel.engine.domain.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -38,6 +43,34 @@ public class ApiExceptionHandler {
     @ExceptionHandler(InvalidInputException.class)
     ResponseEntity<ApiError> invalidInput(InvalidInputException e) {
         return badRequest(e.getMessage(), List.of());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    ResponseEntity<ApiError> notFound(NotFoundException e) {
+        return error(HttpStatus.NOT_FOUND, e.getMessage(), List.of());
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    ResponseEntity<ApiError> conflict(ConflictException e) {
+        return error(HttpStatus.CONFLICT, e.getMessage(), List.of());
+    }
+
+    /** A role rule on a controller method (@PreAuthorize) refused the call. Must not become a 500. */
+    @ExceptionHandler(AccessDeniedException.class)
+    ResponseEntity<ApiError> accessDenied(AccessDeniedException e) {
+        return error(HttpStatus.FORBIDDEN, "Your role can't do this. Ask a manager.", List.of());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    ResponseEntity<ApiError> unauthenticated(AuthenticationException e) {
+        return error(HttpStatus.UNAUTHORIZED, "Sign in to continue.", List.of());
+    }
+
+    /** A unique constraint caught a race the service checks missed, e.g. two identical submissions at once. */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ResponseEntity<ApiError> integrity(DataIntegrityViolationException e) {
+        log.warn("Data integrity violation: {}", e.getMostSpecificCause().getMessage());
+        return error(HttpStatus.CONFLICT, "This change clashes with existing data. Refresh and try again.", List.of());
     }
 
     /** Thrown by the algorithm classes on bad arguments that slipped past the service. */

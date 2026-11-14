@@ -66,6 +66,25 @@ class BloomFilterTest {
     }
 
     @Test
+    @DisplayName("More bits for the same items lowers the false-positive rate")
+    void biggerFilterFewerFalsePositives() {
+        double previous = 1.0;
+        for (int bitsPerItem : new int[]{4, 8, 16}) {
+            BloomFilter f = BloomFilter.withSize(2_000 * bitsPerItem, 4);
+            for (int i = 0; i < 2_000; i++) {
+                f.add("member-" + i);
+            }
+            int fp = 0;
+            for (int i = 0; i < 50_000; i++) {
+                fp += f.mightContain("outsider-" + i) ? 1 : 0;
+            }
+            double rate = fp / 50_000.0;
+            assertTrue(rate < previous, bitsPerItem + " bits per item gave " + rate + ", not below " + previous);
+            previous = rate;
+        }
+    }
+
+    @Test
     @DisplayName("Trace: k positions, all inside [0, m), the same every time for the same item")
     void traceIsDeterministicAndInRange() {
         BloomFilter f = new BloomFilter(1_000, 0.01);

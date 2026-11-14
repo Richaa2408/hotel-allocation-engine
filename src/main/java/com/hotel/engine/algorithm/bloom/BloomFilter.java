@@ -35,6 +35,23 @@ public final class BloomFilter {
         this.words = new long[(bitCount + 63) / 64];
     }
 
+    /** A filter with an exact bit count and hash count, for experiments that vary m and k directly. */
+    public static BloomFilter withSize(int bitCount, int hashCount) {
+        if (bitCount < 1) {
+            throw new IllegalArgumentException("bitCount must be >= 1, got " + bitCount);
+        }
+        if (hashCount < 1 || hashCount > 64) {
+            throw new IllegalArgumentException("hashCount must be between 1 and 64, got " + hashCount);
+        }
+        return new BloomFilter(bitCount, hashCount);
+    }
+
+    private BloomFilter(int bitCount, int hashCount) {
+        this.bitCount = bitCount;
+        this.hashCount = hashCount;
+        this.words = new long[(bitCount + 63) / 64];
+    }
+
     /** m = -n * ln(p) / (ln 2)^2, rounded up. */
     static int optimalBitCount(int n, double p) {
         double m = -n * Math.log(p) / (Math.log(2) * Math.log(2));
@@ -155,6 +172,18 @@ public final class BloomFilter {
             throw new IndexOutOfBoundsException("bit index " + index + " outside 0.." + (bitCount - 1));
         }
         return getBit(index);
+    }
+
+    /** Positions of every bit that is 1, in increasing order (for drawing small filters). */
+    public int[] setBitPositions() {
+        int[] out = new int[setBitCount()];
+        int n = 0;
+        for (int i = 0; i < bitCount; i++) {
+            if (getBit(i)) {
+                out[n++] = i;
+            }
+        }
+        return out;
     }
 
     /** How many bits are currently 1. */

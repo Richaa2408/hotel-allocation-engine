@@ -1,7 +1,14 @@
 {
-  "guestName": "Mehta",
+  "guestName": "Kavya Mehta",
+  "email": "kavya.mehta@example.org",
+  "phone": "+91 98450 12345",
   "roomType": "DELUXE",
-  "checkIn": "2026-11-12",
-  "checkOut": "2026-11-16",
-  "rooms": 2
+  "checkIn": "2026-12-04",
+  "checkOut": "2026-12-07",
+  "rooms": 1,
+  "adults": 2,
+  "needsAccessible": false,
+  "acceptsUpgrade": true,
+  "notes": "Late arrival",
+  "joinWaitlist": false
 }

@@ -6,6 +6,7 @@ import com.hotel.engine.algorithm.flow.EdmondsKarp;
 import com.hotel.engine.algorithm.flow.FlowNetwork;
 import com.hotel.engine.algorithm.flow.MaxFlowResult;
 import com.hotel.engine.algorithm.segtree.AvailabilitySegmentTree;
+import com.hotel.engine.lab.Measure;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -240,7 +241,7 @@ class AlgorithmBenchmark {
     void bloomFilterVsHashSet() throws IOException {
         int lookups = 200_000;
         List<String> csv = new ArrayList<>(List.of(
-                "entries,bloom_bytes,hashset_bytes_approx,memory_ratio,expected_fpr,measured_fpr,"
+                "entries,bloom_bytes,hashset_bytes_estimated,memory_ratio,expected_fpr,measured_fpr,"
                         + "exact_lookups_avoided_pct,bloom_lookup_ns,bloom_with_trace_ns,hashset_lookup_ns"));
         System.out.printf("%n== Bloom filter (p = 1%%) vs HashSet: memory, false positives, lookup time (%,d lookups of "
                 + "unlisted guests)%n", lookups);
@@ -263,12 +264,8 @@ class AlgorithmBenchmark {
             }
             long bloomBytes = ((bloom.bitCount() + 63L) / 64) * 8;
 
-            long before = usedMemory();
-            Set<String> set = new HashSet<>();
-            for (String s : listed) {
-                set.add(new String(s));          // fresh copies, so the set's strings are counted too
-            }
-            long setBytes = Math.max(1, usedMemory() - before);
+            Set<String> set = new HashSet<>(Arrays.asList(listed));
+            long setBytes = Measure.hashSetBytes(set);
 
             int[] fp = new int[1];
             double[] bloomTime = measure(() -> {
@@ -317,19 +314,6 @@ class AlgorithmBenchmark {
             set.clear();
         }
         writeCsv("bloom.csv", csv);
-        System.out.println("HashSet memory is approximate: heap used before and after filling it, after garbage collection.");
-    }
-
-    private static long usedMemory() {
-        Runtime rt = Runtime.getRuntime();
-        for (int i = 0; i < 3; i++) {
-            System.gc();
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-        return rt.totalMemory() - rt.freeMemory();
+        System.out.println("HashSet memory is estimated from JVM object sizes (64-bit, compressed references); see Measure.hashSetBytes.");
     }
 }

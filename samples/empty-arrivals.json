@@ -1,0 +1,6 @@
+{
+  "guests": [],
+  "rooms": [
+    { "number": "101", "type": "STANDARD", "floor": 1, "accessible": true }
+  ]
+}

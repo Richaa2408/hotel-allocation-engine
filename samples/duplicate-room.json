@@ -1,0 +1,9 @@
+{
+  "guests": [
+    { "id": "B1", "name": "Mehta", "roomType": "STANDARD", "needsAccessible": false, "maxFloor": null, "acceptsUpgrade": false }
+  ],
+  "rooms": [
+    { "number": "101", "type": "STANDARD", "floor": 1, "accessible": true },
+    { "number": "101", "type": "STANDARD", "floor": 1, "accessible": false }
+  ]
+}

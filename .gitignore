@@ -32,3 +32,14 @@ build/
 ### VS Code ###
 .vscode/
 .claude/
+.COMPLETE_PROJECT_TECHNICAL_HANDBOOK/
+### Frontend ###
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+
+### Private documents (report notes, demo script, handbook) ###
+docs/handbook/
+docs/report-notes.md
+docs/demo-script.md
+docs/benchmarks/optimisation-comparison.md

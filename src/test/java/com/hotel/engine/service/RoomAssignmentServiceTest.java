@@ -62,8 +62,24 @@ class RoomAssignmentServiceTest {
         assertEquals(0, byName.get("Pillai").suitableRooms());
         assertTrue(byName.get("Pillai").reason().startsWith("No available room is deluxe, accessible, on floor 1"));
         assertEquals(2, byName.get("Nair").suitableRooms());
-        assertTrue(byName.get("Nair").reason().contains("needed by other guests"));
+        assertTrue(byName.get("Nair").reason().contains("rooms that suit them are taken"));
         assertEquals(List.of("201", "202"), r.bottleneckRooms().stream().filter(n -> n.startsWith("2")).sorted().toList());
+    }
+
+    @Test
+    @DisplayName("Suggests a free room that breaks only the room-type rule, or a partner hotel when none is free")
+    void suggestsAlternatives() {
+        List<Room> rooms = List.of(new Room("101", RoomType.STANDARD, 1, true), new Room("401", RoomType.SUITE, 4, false));
+        Guest deluxeAccessible = new Guest("S1", "Menon", RoomType.DELUXE, true, null, false);
+        AssignmentResult r = service.assign(List.of(deluxeAccessible), rooms);
+        assertEquals(0, r.assignedCount());
+        assertTrue(r.unassigned().get(0).suggestion().startsWith("Offer room 101 (standard) at the lower rate"));
+
+        AssignmentResult full = service.assign(List.of(
+                new Guest("F1", "Bose", RoomType.STANDARD, false, null, false),
+                new Guest("F2", "Joshi", RoomType.STANDARD, false, null, false)),
+                List.of(new Room("102", RoomType.STANDARD, 1, false)));
+        assertTrue(full.unassigned().get(0).suggestion().startsWith("Every room is taken tonight"));
     }
 
     @Test
