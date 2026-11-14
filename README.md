@@ -96,6 +96,16 @@ npm run dev
 Open **http://localhost:5173**. If the API runs on another port, set `STAYFLOW_API` first, for example
 `$env:STAYFLOW_API = "http://localhost:8085"`.
 
+### Browsing the database (pgAdmin)
+
+pgAdmin runs next to the database and starts with it. Open **http://localhost:5050** (no pgAdmin login),
+expand **Servers, StayFlow** and enter the password `stayflow`; tick **Save Password** to skip it next time.
+Tables are under **Databases, stayflow, Schemas, public, Tables**; right-click one and choose
+**View/Edit Data** to see its rows, or use **Tools, Query Tool** for SQL.
+
+To start it by hand: `docker compose up -d pgadmin`. Other tools connect to `localhost:5432`, database,
+user and password all `stayflow`.
+
 ### Starting over
 
 **Settings, Demo data, Reset** regenerates the hotel from a seed. To delete the database completely:

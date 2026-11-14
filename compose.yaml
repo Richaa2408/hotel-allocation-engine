@@ -23,6 +23,23 @@ services:
       timeout: 3s
       retries: 10
 
+  pgadmin:
+    # Database browser at http://localhost:5050, with the StayFlow database already listed.
+    # Runs in desktop mode: no pgAdmin login. Only reachable from this machine.
+    image: dpage/pgadmin4:9
+    depends_on:
+      - db
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: stayflow
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "127.0.0.1:5050:80"
+    volumes:
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - pgadmin-data:/var/lib/pgadmin
+
   app:
     # Only started with `--profile app`, so development runs never build or start it.
     profiles: ["app"]
@@ -42,3 +59,4 @@ services:
 
 volumes:
   stayflow-data:
+  pgadmin-data:
