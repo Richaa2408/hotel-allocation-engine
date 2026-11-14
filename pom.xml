@@ -133,11 +133,13 @@
 						<phase>generate-resources</phase>
 					</execution>
 					<execution>
-						<id>npm-ci</id>
+						<!-- npm install, not npm ci: it leaves node_modules alone when nothing changed, while
+						     npm ci rewrites about 17,000 files on every build (minutes on Windows). -->
+						<id>npm-install</id>
 						<goals><goal>npm</goal></goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<arguments>ci --no-audit --no-fund</arguments>
+							<arguments>install --no-audit --no-fund --prefer-offline</arguments>
 						</configuration>
 					</execution>
 					<execution>
