@@ -32,7 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 .claude/
-.COMPLETE_PROJECT_TECHNICAL_HANDBOOK/
+COMPLETE_PROJECT_TECHNICAL_HANDBOOK.md
 ### Frontend ###
 frontend/node_modules/
 frontend/dist/
